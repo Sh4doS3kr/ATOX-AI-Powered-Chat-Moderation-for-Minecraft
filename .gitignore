@@ -1,0 +1,23 @@
+target/
+*.class
+*.jar
+!releases/*.jar
+
+.idea/
+*.iml
+*.iws
+*.ipr
+.project
+.classpath
+.settings/
+
+*.log
+*.tmp
+
+# Maven
+.mvn/
+mvn.cmd
+
+# OS
+.DS_Store
+Thumbs.db

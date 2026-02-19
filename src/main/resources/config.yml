@@ -1,0 +1,30 @@
+# ==========================================
+#           ATOX Configuration
+# ==========================================
+
+# Server type — shown in Discord webhook reports
+# Examples: SURVIVAL, SKYBLOCK, ANARCHY, PARKOUR, LOBBY, FACTIONS, etc.
+server-type: "SURVIVAL"
+
+# Server name (used to identify it in webhook reports)
+server-name: "MyServer"
+
+# Gemini API Configuration
+gemini:
+  api-key: "YOUR_GEMINI_API_KEY_HERE"
+  model: "gemini-2.5-flash-lite"
+
+# Discord Webhook URL for notifications (leave empty to disable)
+discord-webhook: ""
+
+# Analysis interval in minutes
+analysis-interval-minutes: 15
+
+# Maximum age of stored messages (in hours) before they are purged
+message-max-age-hours: 24
+
+# Default durations for AdvancedBan temporary sanctions
+# (used as fallback if Gemini does not specify a duration)
+durations:
+  mute: "1h"
+  ban: "1d"

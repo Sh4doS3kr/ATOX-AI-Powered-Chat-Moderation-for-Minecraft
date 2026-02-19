@@ -1,0 +1,23 @@
+name: AntiToxicity
+version: ${project.version}
+main: com.antitoxicity.AntiToxicity
+api-version: 1.17
+description: AI-powered chat moderation using Google Gemini
+author: Sh4doS3kr
+website: https://github.com/Sh4doS3kr/ATOX-AI-Powered-Chat-Moderation-for-Minecraft
+softdepend:
+  - AdvancedBan
+commands:
+  antitoxicity:
+    description: Main command for ATOX plugin
+    usage: /atox <reload|status|analyze>
+    aliases:
+      - atox
+    permission: antitoxicity.admin
+permissions:
+  antitoxicity.admin:
+    description: Access to ATOX admin commands
+    default: op
+  antitoxicity.bypass:
+    description: Bypass ATOX chat analysis
+    default: false
