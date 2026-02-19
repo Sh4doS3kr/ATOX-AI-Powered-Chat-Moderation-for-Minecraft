@@ -57,10 +57,18 @@ server-type: "SURVIVAL"
 # Server name (used to identify it in webhook reports)
 server-name: "MyServer"
 
-# Gemini API Configuration
+# ---- Gemini API Configuration ----
+# Get your FREE API key at: https://aistudio.google.com/apikey
+# Steps:
+#   1. Go to https://aistudio.google.com/apikey
+#   2. Click "Create API key"
+#   3. Copy the key and paste it below
+#
+# Recommended model: gemma-3-27b-it (more accurate, free)
+# More models available at: https://ai.google.dev/gemini-api/docs/models
 gemini:
-  api-key: "YOUR_GEMINI_API_KEY_HERE"
-  model: "gemini-2.5-flash-lite"
+  api-key: "YOUR_API_KEY_HERE"
+  model: "gemma-3-27b-it"
 
 # Discord Webhook URL for notifications (leave empty to disable)
 discord-webhook: ""
@@ -79,11 +87,15 @@ durations:
 
 ### Getting a Gemini API Key
 
-1. Go to [Google AI Studio](https://aistudio.google.com/)
-2. Click **Get API key** → **Create API key**
-3. Copy the key and paste it in `config.yml`
+1. Go to **[https://aistudio.google.com/apikey](https://aistudio.google.com/apikey)**
+2. Click **Create API key**
+3. Copy the key and paste it in `config.yml` under `gemini.api-key`
 
 > The free tier is sufficient for most servers.
+
+### Recommended Model
+
+**`gemma-3-27b-it`** is the recommended model — it is free, highly accurate, and available via the Google AI Studio API. You can browse all available models at [https://ai.google.dev/gemini-api/docs/models](https://ai.google.dev/gemini-api/docs/models).
 
 ---
 
