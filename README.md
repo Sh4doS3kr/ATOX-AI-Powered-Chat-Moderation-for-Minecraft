@@ -1,4 +1,4 @@
-# ATOX — AI-Powered Chat Moderation for Minecraft
+# ATOX - AI-Powered Chat Moderation for Minecraft
 
 <p align="center">
   <img src="https://img.shields.io/badge/Minecraft-1.17.1--1.21.8-brightgreen?style=for-the-badge&logo=minecraft" alt="Minecraft">
@@ -8,7 +8,7 @@
   <img src="https://img.shields.io/badge/Version-1.0.0-red?style=for-the-badge" alt="Version">
 </p>
 
-**ATOX** is a Paper plugin that uses **Google Gemini AI** to automatically moderate your server's chat. Every configurable interval (default: 15 minutes), it analyzes accumulated player messages and applies sanctions through **AdvancedBan** — no manual review needed.
+**ATOX** is a Paper plugin that uses **Google Gemini AI** to automatically moderate your server's chat. Every configurable interval (default: 15 minutes), it analyzes accumulated player messages and applies sanctions through **AdvancedBan** - no manual review needed.
 
 ---
 
