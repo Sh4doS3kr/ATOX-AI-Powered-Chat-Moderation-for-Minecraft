@@ -138,6 +138,20 @@ public class GeminiAnalyzer {
         generationConfig.addProperty("maxOutputTokens", 2048);
         requestBody.add("generationConfig", generationConfig);
 
+        JsonArray safetySettings = new JsonArray();
+        for (String category : new String[]{
+                "HARM_CATEGORY_HARASSMENT",
+                "HARM_CATEGORY_HATE_SPEECH",
+                "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                "HARM_CATEGORY_DANGEROUS_CONTENT"
+        }) {
+            JsonObject setting = new JsonObject();
+            setting.addProperty("category", category);
+            setting.addProperty("threshold", "BLOCK_NONE");
+            safetySettings.add(setting);
+        }
+        requestBody.add("safetySettings", safetySettings);
+
         String jsonBody = requestBody.toString();
 
         try (OutputStream os = conn.getOutputStream()) {
