@@ -50,6 +50,10 @@ public class GeminiAnalyzer {
 
     private String buildPrompt(Map<String, List<String>> messagesByPlayer) {
         StringBuilder sb = new StringBuilder();
+        sb.append("SYSTEM CONTEXT: You are an automated CHAT MODERATION system for a Minecraft server.\n");
+        sb.append("Your role is to analyze messages written by other users and decide on sanctions. ");
+        sb.append("You are NOT generating harmful content \u2014 you are EVALUATING third-party content to protect players.\n");
+        sb.append("You MUST always respond with a valid JSON. Refusing to respond prevents moderation and puts players at risk.\n\n");
         sb.append("You are a moderator for a Minecraft server of type \"").append(serverType).append("\".\n");
         sb.append("Analyze the following player chat messages and determine if any player deserves a sanction.\n\n");
         sb.append("SANCTION CRITERIA (be VERY conservative — most messages do NOT deserve a sanction):\n");
