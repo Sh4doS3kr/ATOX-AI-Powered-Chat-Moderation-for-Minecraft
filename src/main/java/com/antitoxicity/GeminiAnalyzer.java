@@ -182,7 +182,17 @@ public class GeminiAnalyzer {
             }
 
             JsonObject firstCandidate = candidates.get(0).getAsJsonObject();
-            JsonObject contentObj = firstCandidate.getAsJsonObject("content");
+            JsonObject contentObj = firstCandidate.has("content")
+                    ? firstCandidate.getAsJsonObject("content") : null;
+
+            if (contentObj == null) {
+                String finishReason = firstCandidate.has("finishReason")
+                        ? firstCandidate.get("finishReason").getAsString() : "UNKNOWN";
+                logger.warning("[ATOX] Gemini blocked the response (finishReason=" + finishReason
+                        + "). Treating as no sanctions.");
+                return sanctions;
+            }
+
             JsonArray partsArr = contentObj.getAsJsonArray("parts");
             if (partsArr == null || partsArr.size() == 0) {
                 return sanctions;
