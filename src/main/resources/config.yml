@@ -21,6 +21,8 @@ server-name: "MyServer"
 gemini:
   api-key: "YOUR_API_KEY_HERE"
   model: "gemini-1.5-flash"
+  # Fallback model: used automatically if the primary model blocks the response
+  fallback-model: "gemini-flash-3-preview"
 
 # Discord Webhook URL for notifications (leave empty to disable)
 discord-webhook: ""

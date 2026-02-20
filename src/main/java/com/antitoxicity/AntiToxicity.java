@@ -116,7 +116,8 @@ public class AntiToxicity extends JavaPlugin implements Listener {
         }
 
         String apiKey = getConfig().getString("gemini.api-key", "");
-        String model = getConfig().getString("gemini.model", "gemini-2.5-flash-lite");
+        String model = getConfig().getString("gemini.model", "gemini-1.5-flash");
+        String fallbackModel = getConfig().getString("gemini.fallback-model", "gemini-flash-3-preview");
         String webhookUrl = getConfig().getString("discord-webhook", "");
         String serverName = getConfig().getString("server-name", "Unknown");
         String serverType = getConfig().getString("server-type", "SURVIVAL");
@@ -134,7 +135,7 @@ public class AntiToxicity extends JavaPlugin implements Listener {
             getLogger().warning("Discord webhook URL is not configured!");
         }
 
-        geminiAnalyzer = new GeminiAnalyzer(apiKey, model, serverType, getLogger());
+        geminiAnalyzer = new GeminiAnalyzer(apiKey, model, fallbackModel, serverType, getLogger());
         discordWebhook = new DiscordWebhook(webhookUrl, serverName, serverType, getLogger());
 
         long intervalTicks = intervalMinutes * 60L * 20L;

@@ -17,14 +17,20 @@ public class GeminiAnalyzer {
 
     private final String apiKey;
     private final String model;
+    private final String fallbackModel;
     private final String serverType;
     private final Logger logger;
 
-    public GeminiAnalyzer(String apiKey, String model, String serverType, Logger logger) {
+    public GeminiAnalyzer(String apiKey, String model, String fallbackModel, String serverType, Logger logger) {
         this.apiKey = apiKey;
         this.model = model;
+        this.fallbackModel = fallbackModel;
         this.serverType = serverType;
         this.logger = logger;
+    }
+
+    private static class ModelBlockedException extends RuntimeException {
+        ModelBlockedException(String reason) { super(reason); }
     }
 
     /**
@@ -40,11 +46,22 @@ public class GeminiAnalyzer {
         String prompt = buildPrompt(messagesByPlayer);
 
         try {
-            String response = callGemini(prompt);
+            String response = callGemini(prompt, model);
             return parseSanctions(response);
+        } catch (ModelBlockedException e) {
+            logger.warning("[ATOX] Primary model blocked (" + e.getMessage() + "). Retrying with " + fallbackModel + "...");
         } catch (Exception e) {
             logger.severe("[ATOX] API ERROR - messages will be retained for next cycle: " + e.getMessage());
-            return null; // null = API error, don't consume messages
+            return null;
+        }
+
+        // Retry with fallback model
+        try {
+            String response = callGemini(prompt, fallbackModel);
+            return parseSanctions(response);
+        } catch (Exception e) {
+            logger.severe("[ATOX] Fallback model " + fallbackModel + " also failed: " + e.getMessage());
+            return null;
         }
     }
 
@@ -114,9 +131,9 @@ public class GeminiAnalyzer {
         return sb.toString();
     }
 
-    private String callGemini(String prompt) throws Exception {
+    private String callGemini(String prompt, String modelName) throws Exception {
         String urlStr = "https://generativelanguage.googleapis.com/v1beta/models/"
-                + model + ":generateContent?key=" + apiKey;
+                + modelName + ":generateContent?key=" + apiKey;
 
         URL url = new URL(urlStr);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -206,8 +223,7 @@ public class GeminiAnalyzer {
             if (contentObj == null) {
                 String finishReason = firstCandidate.has("finishReason")
                         ? firstCandidate.get("finishReason").getAsString() : "UNKNOWN";
-                throw new RuntimeException("Gemini could not generate a response (finishReason=" + finishReason
-                        + "). Messages retained for next cycle.");
+                throw new ModelBlockedException(finishReason);
             }
 
             JsonArray partsArr = contentObj.getAsJsonArray("parts");
