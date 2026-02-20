@@ -238,22 +238,22 @@ public class AntiToxicity extends JavaPlugin implements Listener {
 
         switch (s.action) {
             case "WARN":
-                return "warn " + s.player + " " + reason;
+                return "advancedban:warn " + s.player + " " + reason;
             case "MUTE":
-                return "tempmute " + s.player + " " + (dur != null ? dur : defMute) + " " + reason;
+                return "advancedban:tempmute " + s.player + " " + (dur != null ? dur : defMute) + " " + reason;
             case "KICK":
-                return "kick " + s.player + " " + reason;
+                return "advancedban:kick " + s.player + " " + reason;
             case "BAN":
                 if (isPermanent) {
-                    return "ban " + s.player + " " + reason;
+                    return "advancedban:ban " + s.player + " " + reason;
                 } else {
-                    return "tempban " + s.player + " " + (dur != null ? dur : defBan) + " " + reason;
+                    return "advancedban:tempban " + s.player + " " + (dur != null ? dur : defBan) + " " + reason;
                 }
             case "IPBAN":
                 if (isPermanent || dur == null) {
-                    return "ipban " + s.player + " " + reason;
+                    return "advancedban:ipban " + s.player + " " + reason;
                 } else {
-                    return "tempipban " + s.player + " " + dur + " " + reason;
+                    return "advancedban:tempipban " + s.player + " " + dur + " " + reason;
                 }
             default:
                 return null;
