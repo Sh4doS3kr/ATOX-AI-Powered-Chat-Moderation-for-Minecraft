@@ -202,9 +202,8 @@ public class GeminiAnalyzer {
             if (contentObj == null) {
                 String finishReason = firstCandidate.has("finishReason")
                         ? firstCandidate.get("finishReason").getAsString() : "UNKNOWN";
-                logger.warning("[ATOX] Gemini blocked the response (finishReason=" + finishReason
-                        + "). Treating as no sanctions.");
-                return sanctions;
+                throw new RuntimeException("Gemini could not generate a response (finishReason=" + finishReason
+                        + "). Messages retained for next cycle.");
             }
 
             JsonArray partsArr = contentObj.getAsJsonArray("parts");

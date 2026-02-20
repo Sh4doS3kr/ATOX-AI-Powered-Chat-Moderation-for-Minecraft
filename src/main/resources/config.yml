@@ -16,11 +16,11 @@ server-name: "MyServer"
 #   2. Click "Create API key"
 #   3. Copy the key and paste it below
 #
-# Recommended model: gemma-3-27b-it (more accurate, free)
+# Recommended model: gemini-1.5-flash (fast, free, ideal for moderation)
 # More models available at: https://ai.google.dev/gemini-api/docs/models
 gemini:
   api-key: "YOUR_API_KEY_HERE"
-  model: "gemma-3-27b-it"
+  model: "gemini-1.5-flash"
 
 # Discord Webhook URL for notifications (leave empty to disable)
 discord-webhook: ""
