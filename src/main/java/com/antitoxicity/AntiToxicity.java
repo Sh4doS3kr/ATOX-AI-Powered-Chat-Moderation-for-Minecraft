@@ -22,6 +22,7 @@ public class AntiToxicity extends JavaPlugin implements Listener {
     private DiscordWebhook discordWebhook;
     private BukkitTask analysisTask;
     private long maxAgeMillis;
+    private SanctionTracker sanctionTracker;
 
     // ---- Public API for ChatListener ----
     public void storeMessage(String playerName, String message) {
@@ -54,6 +55,24 @@ public class AntiToxicity extends JavaPlugin implements Listener {
     public void markAnalysisComplete() {
         lastAnalysisTime = System.currentTimeMillis();
         getLogger().info("Analysis timestamp advanced. Messages consumed.");
+    }
+
+    public SanctionTracker getSanctionTracker() { return sanctionTracker; }
+
+    /** Returns the last N messages per player that were already consumed (before current cycle) */
+    public Map<String, List<String>> getContextMessages(java.util.Set<String> players, int maxPerPlayer) {
+        Map<String, List<String>> context = new LinkedHashMap<>();
+        for (String player : players) {
+            List<String> msgs = new ArrayList<>();
+            for (StoredMsg sm : allMessages) {
+                if (sm.playerName.equalsIgnoreCase(player) && sm.timestamp <= lastAnalysisTime) {
+                    msgs.add(sm.message);
+                }
+            }
+            int from = Math.max(0, msgs.size() - maxPerPlayer);
+            context.put(player, new ArrayList<>(msgs.subList(from, msgs.size())));
+        }
+        return context;
     }
 
     public int storedMessageCount() {
@@ -135,6 +154,13 @@ public class AntiToxicity extends JavaPlugin implements Listener {
             getLogger().warning("Discord webhook URL is not configured!");
         }
 
+        int warnThreshold = getConfig().getInt("escalation.warns-for-mute", 3);
+        int muteThreshold = getConfig().getInt("escalation.mutes-for-ban", 2);
+        int escalationDays = getConfig().getInt("escalation.window-days", 7);
+        if (sanctionTracker == null) {
+            sanctionTracker = new SanctionTracker(getLogger(), warnThreshold, muteThreshold, escalationDays);
+        }
+
         geminiAnalyzer = new GeminiAnalyzer(apiKey, model, fallbackModel, serverType, getLogger());
         discordWebhook = new DiscordWebhook(webhookUrl, serverName, serverType, getLogger());
 
@@ -161,6 +187,16 @@ public class AntiToxicity extends JavaPlugin implements Listener {
         if (args.length == 0) { sendHelp(sender); return true; }
 
         switch (args[0].toLowerCase()) {
+            case "stats":
+                showStats(sender);
+                break;
+
+            case "fp":
+            case "falsepositiv":
+                sanctionTracker.reportFalsePositive();
+                sender.sendMessage(colorize("&a[ATOX] &7False positive recorded. Thank you."));
+                break;
+
             case "reload":
                 reloadConfig();
                 loadPlugin();
@@ -285,11 +321,38 @@ public class AntiToxicity extends JavaPlugin implements Listener {
         }
     }
 
+    private void showStats(CommandSender sender) {
+        sender.sendMessage(colorize("&c&l[ATOX] &e--- Statistics ---"));
+        sender.sendMessage(colorize("  &7Total sanctions applied: &f" + sanctionTracker.getTotalSanctions()));
+        sender.sendMessage(colorize("  &7Messages analyzed: &f" + sanctionTracker.getTotalMessagesAnalyzed()));
+        sender.sendMessage(colorize("  &7Cycles completed: &f" + sanctionTracker.getTotalCycles()));
+        sender.sendMessage(colorize("  &7False positives reported: &f" + sanctionTracker.getFalsePositivesReported()));
+
+        Map<String, Integer> byType = sanctionTracker.getSanctionsByType();
+        if (!byType.isEmpty()) {
+            StringBuilder sb = new StringBuilder();
+            for (Map.Entry<String, Integer> e : byType.entrySet()) {
+                sb.append(e.getKey()).append(":").append(e.getValue()).append(" ");
+            }
+            sender.sendMessage(colorize("  &7By type: &f" + sb.toString().trim()));
+        }
+
+        List<Map.Entry<String, Integer>> top = sanctionTracker.getTopSanctionedPlayers(5);
+        if (!top.isEmpty()) {
+            sender.sendMessage(colorize("  &7Top sanctioned players:"));
+            for (Map.Entry<String, Integer> e : top) {
+                sender.sendMessage(colorize("    &c" + e.getKey() + " &7-> &f" + e.getValue() + " sanction(s)"));
+            }
+        }
+    }
+
     private void sendHelp(CommandSender sender) {
         sender.sendMessage(colorize("&c&lATOX &7- Commands:"));
         sender.sendMessage(colorize("  &e/atox reload &7- Reload configuration"));
         sender.sendMessage(colorize("  &e/atox status &7- Show plugin status"));
         sender.sendMessage(colorize("  &e/atox analyze &7- Force an analysis now"));
+        sender.sendMessage(colorize("  &e/atox stats &7- Show sanction statistics"));
+        sender.sendMessage(colorize("  &e/atox fp &7- Report a false positive"));
     }
 
     @EventHandler

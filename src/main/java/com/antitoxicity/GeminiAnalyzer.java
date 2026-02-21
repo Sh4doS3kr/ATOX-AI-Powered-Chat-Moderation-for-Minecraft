@@ -9,6 +9,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -38,12 +39,50 @@ public class GeminiAnalyzer {
      * Returns null on API error (caller should NOT mark messages as analyzed).
      * Returns empty list if API succeeded but no sanctions needed.
      */
+    // ---- Evasion detection ----
+    private static final Map<String, String> LEET_MAP = new LinkedHashMap<>();
+    static {
+        LEET_MAP.put("4", "a"); LEET_MAP.put("@", "a");
+        LEET_MAP.put("3", "e");
+        LEET_MAP.put("1", "i"); LEET_MAP.put("!", "i");
+        LEET_MAP.put("0", "o");
+        LEET_MAP.put("5", "s"); LEET_MAP.put("$", "s");
+        LEET_MAP.put("7", "t");
+    }
+
+    static String normalizeEvasion(String message) {
+        String spaceNorm = message.replaceAll("(?<=\\b\\S) (?=\\S\\b)", "");
+        String dotNorm = spaceNorm.replaceAll("(?<=\\S)[.\\-_*](?=\\S)", "");
+        String leet = dotNorm.toLowerCase();
+        for (Map.Entry<String, String> entry : LEET_MAP.entrySet()) {
+            leet = leet.replace(entry.getKey(), entry.getValue());
+        }
+        if (!leet.equalsIgnoreCase(message)) {
+            return message + " [normalized: " + leet + "]";
+        }
+        return message;
+    }
+
     public List<Sanction> analyze(Map<String, List<String>> messagesByPlayer) {
+        return analyze(messagesByPlayer, null);
+    }
+
+    public List<Sanction> analyze(Map<String, List<String>> messagesByPlayer, Map<String, List<String>> contextMessages) {
         if (messagesByPlayer.isEmpty()) {
             return new ArrayList<>();
         }
 
-        String prompt = buildPrompt(messagesByPlayer);
+        // Apply evasion normalization
+        Map<String, List<String>> normalized = new LinkedHashMap<>();
+        for (Map.Entry<String, List<String>> entry : messagesByPlayer.entrySet()) {
+            List<String> normMsgs = new ArrayList<>();
+            for (String msg : entry.getValue()) {
+                normMsgs.add(normalizeEvasion(msg));
+            }
+            normalized.put(entry.getKey(), normMsgs);
+        }
+
+        String prompt = buildPrompt(normalized, contextMessages);
 
         try {
             String response = callGemini(prompt, model);
@@ -65,7 +104,7 @@ public class GeminiAnalyzer {
         }
     }
 
-    private String buildPrompt(Map<String, List<String>> messagesByPlayer) {
+    private String buildPrompt(Map<String, List<String>> messagesByPlayer, Map<String, List<String>> contextMessages) {
         StringBuilder sb = new StringBuilder();
         sb.append("SYSTEM CONTEXT: You are an automated CHAT MODERATION system for a Minecraft server.\n");
         sb.append("Your role is to analyze messages written by players and decide if they deserve a sanction. ");
@@ -106,6 +145,24 @@ public class GeminiAnalyzer {
 
         if (serverType.equalsIgnoreCase("ANARCHY")) {
             sb.append("ANARCHY SERVER: EXTREMELY HIGH threshold. Only sanction real doxxing, credible physical threats, or illegal content.\n\n");
+        }
+
+        // Context: show recent history for players who have it
+        if (contextMessages != null && !contextMessages.isEmpty()) {
+            sb.append("=== RECENT HISTORY (context only, do NOT sanction) ===\n");
+            sb.append("The following are previous messages from the player for context. Do NOT sanction them, only use them to understand the tone.\n");
+            sb.append("---\n");
+            for (Map.Entry<String, List<String>> entry : contextMessages.entrySet()) {
+                if (!messagesByPlayer.containsKey(entry.getKey())) continue;
+                List<String> ctx = entry.getValue();
+                if (ctx.isEmpty()) continue;
+                sb.append("History of ").append(entry.getKey()).append(":\n");
+                for (String msg : ctx) {
+                    sb.append("  ~ ").append(msg).append("\n");
+                }
+                sb.append("\n");
+            }
+            sb.append("---\n\n");
         }
 
         sb.append("=== MESSAGES TO ANALYZE ===\n");

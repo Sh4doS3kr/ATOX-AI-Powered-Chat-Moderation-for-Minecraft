@@ -133,6 +133,62 @@ public class DiscordWebhook {
         conn.disconnect();
     }
 
+    public void sendDailySummary(SanctionTracker tracker) {
+        try {
+            JsonObject payload = new JsonObject();
+            payload.addProperty("username", "ATOX");
+            payload.addProperty("avatar_url", "https://i.imgur.com/4M34hi2.png");
+
+            JsonArray embeds = new JsonArray();
+            JsonObject embed = new JsonObject();
+
+            embed.addProperty("title", "\uD83D\uDCCA Daily Summary - " + serverName);
+            embed.addProperty("color", 3447003); // Blue
+
+            java.util.List<SanctionTracker.SanctionRecord> last24h = tracker.getLast24hSanctions();
+            java.util.Map<String, Integer> byType = tracker.getSanctionsByType();
+            java.util.List<java.util.Map.Entry<String, Integer>> top = tracker.getTopSanctionedPlayers(5);
+
+            StringBuilder desc = new StringBuilder();
+            desc.append("**\uD83D\uDCEC Messages analyzed (total):** ").append(tracker.getTotalMessagesAnalyzed()).append("\n");
+            desc.append("**\u2696\uFE0F Sanctions last 24h:** ").append(last24h.size()).append("\n");
+            desc.append("**\uD83D\uDD04 Cycles completed:** ").append(tracker.getTotalCycles()).append("\n");
+            desc.append("**\u274C False positives reported:** ").append(tracker.getFalsePositivesReported()).append("\n\n");
+
+            if (!byType.isEmpty()) {
+                desc.append("**Sanctions by type:**\n");
+                for (java.util.Map.Entry<String, Integer> e : byType.entrySet()) {
+                    desc.append("  ").append(getActionEmoji(e.getKey())).append(" ").append(e.getKey())
+                            .append(": ").append(e.getValue()).append("\n");
+                }
+                desc.append("\n");
+            }
+
+            if (!top.isEmpty()) {
+                desc.append("**\uD83C\uDFC6 Most sanctioned players:**\n");
+                for (int i = 0; i < top.size(); i++) {
+                    desc.append("  **").append(i + 1).append(".** `")
+                            .append(top.get(i).getKey()).append("` \u2014 ")
+                            .append(top.get(i).getValue()).append(" sanction(s)\n");
+                }
+            }
+
+            embed.addProperty("description", desc.toString());
+
+            String timestamp = LocalDateTime.now().format(FORMATTER);
+            JsonObject footer = new JsonObject();
+            footer.addProperty("text", "\uD83C\uDFAE " + serverName + " | " + serverType + " | " + timestamp);
+            embed.add("footer", footer);
+
+            embeds.add(embed);
+            payload.add("embeds", embeds);
+
+            sendPayload(payload.toString());
+        } catch (Exception e) {
+            logger.severe("[ATOX] Error sending daily summary: " + e.getMessage());
+        }
+    }
+
     private String getActionEmoji(String action) {
         switch (action) {
             case "WARN":  return "\u26a0\ufe0f";

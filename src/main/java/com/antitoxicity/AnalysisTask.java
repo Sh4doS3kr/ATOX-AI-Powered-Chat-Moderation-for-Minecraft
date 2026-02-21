@@ -3,6 +3,7 @@ package com.antitoxicity;
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -15,6 +16,9 @@ public class AnalysisTask extends BukkitRunnable {
     private final Logger logger;
     private final String defaultMuteDuration;
     private final String defaultBanDuration;
+
+    private int cycleCount = 0;
+    private static final int DAILY_SUMMARY_CYCLES = 96; // 96 x 15min = 24h
 
     public AnalysisTask(AntiToxicity plugin, GeminiAnalyzer geminiAnalyzer,
                         DiscordWebhook discordWebhook,
@@ -50,7 +54,10 @@ public class AnalysisTask extends BukkitRunnable {
         logger.info("[ATOX] Analyzing " + totalMessages + " messages from "
                 + totalPlayers + " player(s)...");
 
-        List<GeminiAnalyzer.Sanction> sanctions = geminiAnalyzer.analyze(recentMessages);
+        // Build context: last 10 messages per player (before current cycle)
+        Map<String, List<String>> contextMessages = plugin.getContextMessages(recentMessages.keySet(), 10);
+
+        List<GeminiAnalyzer.Sanction> sanctions = geminiAnalyzer.analyze(recentMessages, contextMessages);
 
         // null = API error -> retain messages, they accumulate for next cycle
         if (sanctions == null) {
@@ -62,13 +69,32 @@ public class AnalysisTask extends BukkitRunnable {
         // API succeeded -> mark messages as consumed
         plugin.markAnalysisComplete();
 
+        SanctionTracker tracker = plugin.getSanctionTracker();
+        tracker.recordCycle(totalMessages);
+
         List<GeminiAnalyzer.Sanction> dedupedSanctions = plugin.deduplicateSanctions(sanctions);
 
-        if (!dedupedSanctions.isEmpty()) {
+        // Pattern escalation
+        List<GeminiAnalyzer.Sanction> finalSanctions = new ArrayList<>();
+        for (GeminiAnalyzer.Sanction s : dedupedSanctions) {
+            tracker.recordSanction(s);
+            String escalated = tracker.checkEscalation(s.player);
+            if (escalated != null && severityOf(escalated) > severityOf(s.action)) {
+                logger.warning("[ATOX] Escalating " + s.player
+                        + " from " + s.action + " to " + escalated + " due to history.");
+                finalSanctions.add(new GeminiAnalyzer.Sanction(
+                        s.player, escalated, "Repeat offender: " + s.reason,
+                        s.triggerMessage, escalated.equals("BAN") ? "7d" : "1h"));
+            } else {
+                finalSanctions.add(s);
+            }
+        }
+
+        if (!finalSanctions.isEmpty()) {
             logger.info("[ATOX] Gemini returned " + sanctions.size() + " sanction(s), "
-                    + dedupedSanctions.size() + " after deduplication.");
+                    + finalSanctions.size() + " after dedup+escalation.");
             Bukkit.getScheduler().runTask(plugin, () -> {
-                for (GeminiAnalyzer.Sanction sanction : dedupedSanctions) {
+                for (GeminiAnalyzer.Sanction sanction : finalSanctions) {
                     String cmd = plugin.buildCommand(sanction);
                     if (cmd != null) {
                         logger.info("[ATOX] Executing: " + cmd);
@@ -84,6 +110,24 @@ public class AnalysisTask extends BukkitRunnable {
             logger.info("[ATOX] No sanctions needed this cycle.");
         }
 
-        discordWebhook.sendReport(dedupedSanctions, totalMessages, totalPlayers);
+        discordWebhook.sendReport(finalSanctions, totalMessages, totalPlayers);
+
+        // Daily summary every ~24h
+        cycleCount++;
+        if (cycleCount >= DAILY_SUMMARY_CYCLES) {
+            cycleCount = 0;
+            discordWebhook.sendDailySummary(tracker);
+        }
+    }
+
+    private int severityOf(String action) {
+        switch (action) {
+            case "IPBAN": return 5;
+            case "BAN":   return 4;
+            case "KICK":  return 3;
+            case "MUTE":  return 2;
+            case "WARN":  return 1;
+            default:      return 0;
+        }
     }
 }

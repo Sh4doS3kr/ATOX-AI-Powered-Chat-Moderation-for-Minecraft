@@ -24,6 +24,16 @@ gemini:
   # Fallback model: used automatically if the primary model blocks the response
   fallback-model: "gemini-flash-3-preview"
 
+# ---- Automatic sanction escalation ----
+# If a player accumulates too many WARNs or MUTEs within the time window, they are escalated automatically
+escalation:
+  # Number of WARNs to automatically escalate to MUTE
+  warns-for-mute: 3
+  # Number of MUTEs to automatically escalate to BAN
+  mutes-for-ban: 2
+  # Time window in days to count sanctions
+  window-days: 7
+
 # Discord Webhook URL for notifications (leave empty to disable)
 discord-webhook: ""
 
