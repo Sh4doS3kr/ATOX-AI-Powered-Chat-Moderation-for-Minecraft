@@ -24,6 +24,12 @@ gemini:
   # Fallback model: used automatically if the primary model blocks the response
   fallback-model: "gemini-flash-3-preview"
 
+# ---- Username analysis ----
+# Analyzes each player's username on join and blocks offensive names
+username-check:
+  enabled: true
+  kick-message: "Your username is not allowed on this server.\nReason: {reason}\n\nChange your name and try again."
+
 # ---- Automatic sanction escalation ----
 # If a player accumulates too many WARNs or MUTEs within the time window, they are escalated automatically
 escalation:

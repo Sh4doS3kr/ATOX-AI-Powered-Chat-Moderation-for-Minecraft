@@ -133,6 +133,56 @@ public class DiscordWebhook {
         conn.disconnect();
     }
 
+    public void sendUsernameBlock(String playerName, String reason) {
+        try {
+            JsonObject payload = new JsonObject();
+            payload.addProperty("username", "ATOX");
+            payload.addProperty("avatar_url", "https://i.imgur.com/4M34hi2.png");
+
+            JsonArray embeds = new JsonArray();
+            JsonObject embed = new JsonObject();
+
+            embed.addProperty("title", "\uD83D\uDEAB Username Blocked");
+            embed.addProperty("color", 15158332); // Red
+            embed.addProperty("description",
+                    "A player was blocked from joining due to an inappropriate username.");
+
+            JsonArray fields = new JsonArray();
+
+            JsonObject nameField = new JsonObject();
+            nameField.addProperty("name", "\uD83D\uDC64 Player");
+            nameField.addProperty("value", "`" + playerName + "`");
+            nameField.addProperty("inline", true);
+
+            JsonObject reasonField = new JsonObject();
+            reasonField.addProperty("name", "\uD83D\uDCCB Reason");
+            reasonField.addProperty("value", reason);
+            reasonField.addProperty("inline", true);
+
+            JsonObject serverField = new JsonObject();
+            serverField.addProperty("name", "\uD83D\uDDA5\uFE0F Server");
+            serverField.addProperty("value", serverName);
+            serverField.addProperty("inline", true);
+
+            fields.add(nameField);
+            fields.add(reasonField);
+            fields.add(serverField);
+            embed.add("fields", fields);
+
+            String timestamp = LocalDateTime.now().format(FORMATTER);
+            JsonObject footer = new JsonObject();
+            footer.addProperty("text", "\uD83C\uDFAE " + serverName + " | " + serverType + " | " + timestamp);
+            embed.add("footer", footer);
+
+            embeds.add(embed);
+            payload.add("embeds", embeds);
+
+            sendPayload(payload.toString());
+        } catch (Exception e) {
+            logger.severe("[ATOX] Error sending username block notification: " + e.getMessage());
+        }
+    }
+
     public void sendDailySummary(SanctionTracker tracker) {
         try {
             JsonObject payload = new JsonObject();

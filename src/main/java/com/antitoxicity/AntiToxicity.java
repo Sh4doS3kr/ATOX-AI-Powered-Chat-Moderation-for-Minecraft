@@ -4,7 +4,9 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
@@ -353,6 +355,24 @@ public class AntiToxicity extends JavaPlugin implements Listener {
         sender.sendMessage(colorize("  &e/atox analyze &7- Force an analysis now"));
         sender.sendMessage(colorize("  &e/atox stats &7- Show sanction statistics"));
         sender.sendMessage(colorize("  &e/atox fp &7- Report a false positive"));
+    }
+
+    @EventHandler(priority = EventPriority.HIGH)
+    public void onPlayerPreLogin(AsyncPlayerPreLoginEvent event) {
+        if (!getConfig().getBoolean("username-check.enabled", true)) return;
+        if (geminiAnalyzer == null) return;
+
+        String name = event.getName();
+        String offensiveReason = geminiAnalyzer.analyzeUsername(name);
+
+        if (offensiveReason != null && !offensiveReason.isEmpty()) {
+            String kickMsg = getConfig().getString("username-check.kick-message",
+                    "Your username is not allowed on this server.\nReason: {reason}\n\nChange your name and try again.");
+            kickMsg = kickMsg.replace("{reason}", offensiveReason);
+            event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, kickMsg);
+            getLogger().warning("[ATOX] Offensive username blocked: " + name + " | Reason: " + offensiveReason);
+            discordWebhook.sendUsernameBlock(name, offensiveReason);
+        }
     }
 
     @EventHandler

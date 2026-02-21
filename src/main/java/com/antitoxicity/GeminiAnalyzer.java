@@ -329,6 +329,56 @@ public class GeminiAnalyzer {
         return sanctions;
     }
 
+    /**
+     * Analyzes a player's username for offensive content.
+     * Returns a reason string if the name is offensive, or null if it's clean.
+     */
+    public String analyzeUsername(String playerName) {
+        String normalizedName = normalizeEvasion(playerName);
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("SYSTEM CONTEXT: You are a moderation system for a Minecraft server.\n");
+        sb.append("You MUST always respond with a valid JSON, no exceptions.\n\n");
+        sb.append("Analyze the following Minecraft username and determine if it is offensive, inappropriate, or violates the rules of a family-friendly server.\n\n");
+        sb.append("Username to analyze: \"").append(normalizedName).append("\"\n\n");
+        sb.append("CRITERIA - The name IS offensive if it contains:\n");
+        sb.append("- Serious insults or profanity directed at people\n");
+        sb.append("- Racist, homophobic, sexist or discriminatory terms\n");
+        sb.append("- Explicit sexual references\n");
+        sb.append("- Threats or incitement to hatred\n\n");
+        sb.append("CRITERIA - The name is NOT offensive if:\n");
+        sb.append("- It is a normal nickname, first name, or neutral word combination\n");
+        sb.append("- It contains numbers or underscores normally\n");
+        sb.append("- It is youth slang without a clearly offensive connotation\n");
+        sb.append("- It could be offensive in some context but is not clearly so\n\n");
+        sb.append("When in doubt, respond that it is NOT offensive.\n\n");
+        sb.append("Respond ONLY with this JSON (no markdown):\n");
+        sb.append("{\"offensive\": true/false, \"reason\": \"brief reason if offensive, empty if not\"}\n");
+
+        try {
+            String response = callGemini(sb.toString(), model);
+            JsonObject root = com.google.gson.JsonParser.parseString(response).getAsJsonObject();
+            JsonArray candidates = root.getAsJsonArray("candidates");
+            if (candidates == null || candidates.size() == 0) return null;
+            JsonObject content = candidates.get(0).getAsJsonObject().has("content")
+                    ? candidates.get(0).getAsJsonObject().getAsJsonObject("content") : null;
+            if (content == null) return null;
+            JsonArray parts = content.getAsJsonArray("parts");
+            if (parts == null || parts.size() == 0) return null;
+            String text = parts.get(0).getAsJsonObject().get("text").getAsString().trim();
+            if (text.startsWith("```")) {
+                text = text.replaceAll("^```[a-zA-Z]*\\n?", "").replaceAll("\\n?```$", "").trim();
+            }
+            JsonObject result = com.google.gson.JsonParser.parseString(text).getAsJsonObject();
+            if (result.has("offensive") && result.get("offensive").getAsBoolean()) {
+                return result.has("reason") ? result.get("reason").getAsString() : "Inappropriate username";
+            }
+        } catch (Exception e) {
+            logger.warning("[ATOX] Error analyzing username: " + e.getMessage());
+        }
+        return null;
+    }
+
     private boolean isValidAction(String action) {
         return action.equals("WARN") || action.equals("MUTE")
                 || action.equals("KICK") || action.equals("BAN") || action.equals("IPBAN");
