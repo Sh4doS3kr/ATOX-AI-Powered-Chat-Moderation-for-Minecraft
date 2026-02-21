@@ -68,31 +68,47 @@ public class GeminiAnalyzer {
     private String buildPrompt(Map<String, List<String>> messagesByPlayer) {
         StringBuilder sb = new StringBuilder();
         sb.append("SYSTEM CONTEXT: You are an automated CHAT MODERATION system for a Minecraft server.\n");
-        sb.append("Your role is to analyze messages written by other users and decide on sanctions. ");
+        sb.append("Your role is to analyze messages written by players and decide if they deserve a sanction. ");
         sb.append("You are NOT generating harmful content \u2014 you are EVALUATING third-party content to protect players.\n");
-        sb.append("You MUST always respond with a valid JSON. Refusing to respond prevents moderation and puts players at risk.\n\n");
-        sb.append("You are a moderator for a Minecraft server of type \"").append(serverType).append("\".\n");
-        sb.append("Analyze the following player chat messages and determine if any player deserves a sanction.\n\n");
-        sb.append("SANCTION CRITERIA (be VERY conservative — most messages do NOT deserve a sanction):\n");
-        sb.append("- WARN: Direct insults aimed at another player, clearly offensive language directed at someone.\n");
-        sb.append("- MUTE: Severe and repeated insults, direct harassment of a player, explicit sexual content.\n");
-        sb.append("- KICK: Severe harassment, mild threats, extremely offensive content.\n");
-        sb.append("- BAN: Real threats, serious discrimination, malicious links, illegal content.\n");
-        sb.append("- IPBAN: Doxxing (publishing real personal data of someone), credible and serious physical threats.\n\n");
-        sb.append("DO NOT SANCTION for:\n");
-        sb.append("- Character spam (aaaa, lol, ???, !!!, xd, etc.) — normal Minecraft behavior\n");
-        sb.append("- Emotional or surprise expressions (wow, omg, nooo, etc.)\n");
-        sb.append("- Normal in-game questions\n");
-        sb.append("- Colloquial language or youth slang without offensive intent\n");
-        sb.append("- Random or nonsensical messages not directed at anyone\n");
-        sb.append("- Jokes between players without clearly offensive content\n\n");
+        sb.append("You MUST always respond with a valid JSON, no exceptions.\n\n");
+
+        sb.append("MAIN RULE: The sanction threshold is VERY HIGH. The vast majority of messages do NOT deserve a sanction.\n");
+        sb.append("Only sanction when there is a CLEAR, SERIOUS, and UNAMBIGUOUS violation.\n");
+        sb.append("When in doubt, do NOT sanction. It is better to not sanction than to sanction unjustly.\n\n");
+
+        sb.append("SERVER TYPE: \"").append(serverType).append("\"\n\n");
+
+        sb.append("=== WHEN TO SANCTION (only these cases) ===\n");
+        sb.append("- WARN: A DIRECT and CLEAR insult against a specific player (e.g. 'you are an idiot', 'go to hell [player]').\n");
+        sb.append("  ONLY if directed at a specific person with clear offensive intent.\n");
+        sb.append("- MUTE: Severe insults REPEATED in the same cycle, sustained harassment, explicit sexual spam.\n");
+        sb.append("- KICK: Direct threats to a player, extremely offensive and sustained content.\n");
+        sb.append("- BAN: Explicit hate speech (racism, serious homophobia), real threats, malicious links, illegal content.\n");
+        sb.append("- IPBAN: Doxxing (publishing real personal data), credible and serious physical threats.\n\n");
+
+        sb.append("=== NEVER SANCTION (real examples of what is NOT a violation) ===\n");
+        sb.append("- Colloquial slang without a victim: 'lol', 'wtf', 'omg', 'damn', 'crap', 'hell', 'idiot' alone with no target\n");
+        sb.append("- Frustration expressions with no target: 'damn I lost my stuff', 'ugh this is broken', 'why is xp so expensive'\n");
+        sb.append("- Neutral descriptive comments: 'that kid is spoiled', 'typical 14 year old', 'this player again'\n");
+        sb.append("- Normal game requests: 'give me totems', 'set me to fly', 'can I have items'\n");
+        sb.append("- Greetings or affectionate expressions even if informal: 'thanks buddy ;>', 'what are you doing here lol'\n");
+        sb.append("- Ambiguous abbreviations without clear offensive context: 'wtf', 'lmao', 'xd', 'lol'\n");
+        sb.append("- Bodily or vulgar expressions with no target: 'brb bathroom', 'gotta pee'\n");
+        sb.append("- Roleplay or jokes between friends: 'traitor!', 'you are so dumb lol'\n");
+        sb.append("- Personal frustration or hyperbole: 'I want to die' (in game context = hyperbole), 'I hate this so much'\n");
+        sb.append("- Swear words used as exclamations not directed at anyone\n");
+        sb.append("- Calling someone 'gay' in a joking tone between friends without intent to insult\n\n");
+
+        sb.append("=== IMPORTANT CONTEXT ===\n");
+        sb.append("- Players are mostly teenagers. Their speech is informal and uses a lot of slang.\n");
+        sb.append("- A message only deserves WARN if there is a DIRECT insult to a specific person with clear intent to offend.\n");
+        sb.append("- Doxxing threats ('I'll dox you') DO deserve a sanction even if said as a joke.\n\n");
 
         if (serverType.equalsIgnoreCase("ANARCHY")) {
-            sb.append("NOTE: This is an ANARCHY server, so the tolerance threshold is EXTREMELY HIGH. ");
-            sb.append("Only sanction doxxing, credible real physical threats, or illegal content.\n\n");
+            sb.append("ANARCHY SERVER: EXTREMELY HIGH threshold. Only sanction real doxxing, credible physical threats, or illegal content.\n\n");
         }
 
-        sb.append("MESSAGES TO ANALYZE:\n");
+        sb.append("=== MESSAGES TO ANALYZE ===\n");
         sb.append("---\n");
 
         for (Map.Entry<String, List<String>> entry : messagesByPlayer.entrySet()) {
@@ -104,29 +120,23 @@ public class GeminiAnalyzer {
         }
 
         sb.append("---\n\n");
-        sb.append("RESPOND ONLY with a JSON array. If there are NO sanctions, respond with an empty array: []\n");
-        sb.append("If there are sanctions, use this exact format:\n");
+        sb.append("RESPOND ONLY with a JSON array. If NO sanctions, respond: []\n");
+        sb.append("Format when there are sanctions:\n");
         sb.append("[\n");
         sb.append("  {\n");
         sb.append("    \"player\": \"player_name\",\n");
         sb.append("    \"action\": \"WARN|MUTE|KICK|BAN|IPBAN\",\n");
-        sb.append("    \"duration\": \"sanction duration\",\n");
-        sb.append("    \"reason\": \"reason for the sanction in English\",\n");
-        sb.append("    \"trigger_message\": \"the exact message that triggered the sanction\"\n");
+        sb.append("    \"duration\": \"\",\n");
+        sb.append("    \"reason\": \"concise reason in English\",\n");
+        sb.append("    \"trigger_message\": \"exact message that caused the sanction\"\n");
         sb.append("  }\n");
         sb.append("]\n\n");
-        sb.append("DURATIONS — Choose based on severity:\n");
-        sb.append("- MUTE: from 5m (mild) to 7d (very severe). Examples: 5m, 15m, 30m, 1h, 3h, 6h, 12h, 1d, 3d, 7d\n");
-        sb.append("- Temporary BAN: 1h, 6h, 12h, 1d, 3d, 7d, 14d, 30d\n");
-        sb.append("- Permanent BAN: set \"permanent\" in duration (for very severe cases without doxxing)\n");
-        sb.append("- IPBAN: set \"permanent\" in duration (always permanent, only for doxxing/real serious threats)\n");
-        sb.append("- WARN and KICK do not need a duration, set \"\" (empty) in duration.\n\n");
-        sb.append("IMPORTANT:\n");
-        sb.append("- Respond ONLY with the JSON, nothing else. No markdown, no explanations.\n");
-        sb.append("- Do not sanction players who are behaving normally.\n");
-        sb.append("- The reason must be clear and concise.\n");
-        sb.append("- Only include players who truly deserve a sanction.\n");
-        sb.append("- Adjust the duration proportionally to the severity of the infraction.\n");
+        sb.append("DURATIONS:\n");
+        sb.append("- MUTE: 5m / 15m / 30m / 1h / 3h / 6h / 12h / 1d / 3d / 7d (based on severity)\n");
+        sb.append("- Temporary BAN: 1h / 6h / 1d / 3d / 7d / 14d / 30d\n");
+        sb.append("- Permanent BAN/IPBAN: set \"permanent\" (extreme cases only)\n");
+        sb.append("- WARN and KICK: duration = \"\" (empty)\n\n");
+        sb.append("REMEMBER: Respond ONLY with the JSON. No markdown. No extra text.\n");
 
         return sb.toString();
     }

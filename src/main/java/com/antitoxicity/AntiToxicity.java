@@ -230,7 +230,9 @@ public class AntiToxicity extends JavaPlugin implements Listener {
     }
 
     String buildCommand(GeminiAnalyzer.Sanction s) {
-        String reason = "[ATOX AI] " + s.reason.replace("\"", "'");
+        String trigger = (s.triggerMessage != null && !s.triggerMessage.isEmpty() && !s.triggerMessage.equals("N/A"))
+                ? " | Message: \"" + s.triggerMessage.replace("\"", "'") + "\"" : "";
+        String reason = "[ATOX AI] " + s.reason.replace("\"", "'") + trigger;
         String defMute = getConfig().getString("durations.mute", "1h");
         String defBan = getConfig().getString("durations.ban", "1d");
         String dur = (s.duration != null && !s.duration.isEmpty()) ? s.duration : null;
