@@ -337,24 +337,18 @@ public class GeminiAnalyzer {
         String normalizedName = normalizeEvasion(playerName);
 
         StringBuilder sb = new StringBuilder();
-        sb.append("SYSTEM CONTEXT: You are a moderation system for a Minecraft server.\n");
-        sb.append("You MUST always respond with a valid JSON, no exceptions.\n\n");
-        sb.append("Analyze the following Minecraft username. The threshold is VERY HIGH: only block names that are CLEARLY and SERIOUSLY offensive.\n\n");
-        sb.append("Username to analyze: \"").append(normalizedName).append("\"\n\n");
-        sb.append("BLOCK ONLY if the name EXPLICITLY contains ONE OF THESE WORDS:\n");
-        sb.append("- Direct racial slur (e.g: n****r, n****, etc.)\n");
-        sb.append("- Extremely explicit sexual insult (e.g: f****t, c***, etc.)\n");
-        sb.append("- Real violence threat (e.g: 'kill', 'murder', 'die' combined with name)\n\n");
-        sb.append("NEVER BLOCK under any circumstance:\n");
-        sb.append("- Surnames, first names, cities, places: 'Fajardo', 'Garcia', 'Lopez', 'Mexico', 'Colombia'\n");
-        sb.append("- Normal Latin slang: 'chaca', 'cholo', 'loco', 'hdp', 'crack', 'bro', 'manco', 'noob', 'pro', 'gg'\n");
-        sb.append("- Neutral English words: 'player', 'gamer', 'king', 'lord', 'master', 'shadow', 'dark'\n");
-        sb.append("- Any combination that is NOT AN EXPLICIT AND SERIOUS SLUR\n");
-        sb.append("- Numbers, underscores, symbols\n\n");
-        sb.append("EXAMPLES OF NAMES THAT MUST BE ALLOWED: Fajardo, Garcia, Lopez, ShadowKing, NoobMaster, ProPlayer, ElChaca, ElLoco, DarkLord, Gamer123\n\n");
-        sb.append("ABSOLUTE GOLDEN RULE: If the word is not on the explicit slur list, DO NOT BLOCK. Default to offensive=false.\n\n");
-        sb.append("Respond ONLY with this JSON (no markdown):\n");
-        sb.append("{\"offensive\": true/false, \"reason\": \"brief reason if offensive, empty if not\"}\n");
+        sb.append("CONTEXT: Analyze a username. Respond ONLY with valid JSON.\n\n");
+        sb.append("Username: \"").append(normalizedName).append("\"\n\n");
+        sb.append("RULE: Block ONLY if it contains EXACTLY one of these words (case-insensitive):\n");
+        sb.append("- n****r\n");
+        sb.append("- n****\n");
+        sb.append("- f****t\n");
+        sb.append("- c***\n");
+        sb.append("- p****\n\n");
+        sb.append("IF it does NOT contain ANY of those EXACT words, respond offensive=false.\n\n");
+        sb.append("Examples that MUST be offensive=false: Fajardo, Garcia, Lopez, ShadowKing, NoobMaster, ProPlayer, ElChaca, ElLoco, DarkLord, Gamer123, chaca, cholo, loco, hdp, crack, bro, manco, noob, pro, gg, player, gamer, king, lord, master, shadow, dark\n\n");
+        sb.append("JSON (no markdown):\n");
+        sb.append("{\"offensive\": true/false, \"reason\": \"reason if offensive\"}\n");
 
         try {
             String response = callGemini(sb.toString(), model);
