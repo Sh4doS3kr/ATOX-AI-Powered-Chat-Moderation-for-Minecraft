@@ -74,17 +74,21 @@ public class AnalysisTask extends BukkitRunnable {
 
         List<GeminiAnalyzer.Sanction> dedupedSanctions = plugin.deduplicateSanctions(sanctions);
 
-        // Pattern escalation
+        // Pattern escalation: check if any sanctioned player should be escalated
         List<GeminiAnalyzer.Sanction> finalSanctions = new ArrayList<>();
         for (GeminiAnalyzer.Sanction s : dedupedSanctions) {
             tracker.recordSanction(s);
-            String escalated = tracker.checkEscalation(s.player);
-            if (escalated != null && severityOf(escalated) > severityOf(s.action)) {
-                logger.warning("[ATOX] Escalating " + s.player
-                        + " from " + s.action + " to " + escalated + " due to history.");
-                finalSanctions.add(new GeminiAnalyzer.Sanction(
-                        s.player, escalated, "Repeat offender: " + s.reason,
-                        s.triggerMessage, escalated.equals("BAN") ? "7d" : "1h"));
+            if (plugin.getConfig().getBoolean("escalation.enabled", true)) {
+                String escalated = tracker.checkEscalation(s.player);
+                if (escalated != null && severityOf(escalated) > severityOf(s.action)) {
+                    logger.warning("[ATOX] Escalating " + s.player
+                            + " from " + s.action + " to " + escalated + " due to history.");
+                    finalSanctions.add(new GeminiAnalyzer.Sanction(
+                            s.player, escalated, "Recidivism: " + s.reason,
+                            s.triggerMessage, escalated.equals("BAN") ? "7d" : "1h"));
+                } else {
+                    finalSanctions.add(s);
+                }
             } else {
                 finalSanctions.add(s);
             }

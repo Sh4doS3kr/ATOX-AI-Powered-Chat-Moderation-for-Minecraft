@@ -31,12 +31,13 @@ username-check:
   kick-message: "Your username is not allowed on this server.\nReason: {reason}\n\nChange your name and try again."
 
 # ---- Automatic sanction escalation ----
-# If a player accumulates too many WARNs or MUTEs within the time window, they are escalated automatically
+# DISABLED to avoid false positive chains
 escalation:
+  enabled: false
   # Number of WARNs to automatically escalate to MUTE
-  warns-for-mute: 3
+  warns-for-mute: 10
   # Number of MUTEs to automatically escalate to BAN
-  mutes-for-ban: 2
+  mutes-for-ban: 5
   # Time window in days to count sanctions
   window-days: 7
 
