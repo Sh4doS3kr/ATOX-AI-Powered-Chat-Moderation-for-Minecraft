@@ -269,35 +269,45 @@ public class AntiToxicity extends JavaPlugin implements Listener {
 
     String buildCommand(GeminiAnalyzer.Sanction s) {
         String trigger = (s.triggerMessage != null && !s.triggerMessage.isEmpty() && !s.triggerMessage.equals("N/A"))
-                ? " | Message: \"" + s.triggerMessage.replace("\"", "'") + "\"" : "";
-        String reason = "[ATOX AI] " + s.reason.replace("\"", "'") + trigger;
+                ? " | Message: \"" + s.triggerMessage.replace("\"", "'") + "\""
+                : "";
+        String reason = "[Automated System] " + s.reason.replace("\"", "'") + trigger;
         String defMute = getConfig().getString("durations.mute", "1h");
         String defBan = getConfig().getString("durations.ban", "1d");
         String dur = (s.duration != null && !s.duration.isEmpty()) ? s.duration : null;
         boolean isPermanent = "permanent".equalsIgnoreCase(dur);
 
+        String cmd;
         switch (s.action) {
             case "WARN":
-                return "advancedban:warn " + s.player + " " + reason;
+                cmd = "advancedban:warn " + s.player + " \"" + reason + "\"";
+                break;
             case "MUTE":
-                return "advancedban:tempmute " + s.player + " " + (dur != null ? dur : defMute) + " " + reason;
+                cmd = "advancedban:tempmute " + s.player + " " + (dur != null ? dur : defMute) + " \"" + reason + "\"";
+                break;
             case "KICK":
-                return "advancedban:kick " + s.player + " " + reason;
+                cmd = "advancedban:kick " + s.player + " \"" + reason + "\"";
+                break;
             case "BAN":
                 if (isPermanent) {
-                    return "advancedban:ban " + s.player + " " + reason;
+                    cmd = "advancedban:ban " + s.player + " \"" + reason + "\"";
                 } else {
-                    return "advancedban:tempban " + s.player + " " + (dur != null ? dur : defBan) + " " + reason;
+                    cmd = "advancedban:tempban " + s.player + " " + (dur != null ? dur : defBan) + " \"" + reason + "\"";
                 }
+                break;
             case "IPBAN":
                 if (isPermanent || dur == null) {
-                    return "advancedban:ipban " + s.player + " " + reason;
+                    cmd = "advancedban:ipban " + s.player + " \"" + reason + "\"";
                 } else {
-                    return "advancedban:tempipban " + s.player + " " + dur + " " + reason;
+                    cmd = "advancedban:tempipban " + s.player + " " + dur + " \"" + reason + "\"";
                 }
+                break;
             default:
                 return null;
         }
+        
+        getLogger().info("[ATOX] Built command: " + cmd);
+        return cmd;
     }
 
     /** Keeps only the most severe sanction per player. Order: IPBAN > BAN > KICK > MUTE > WARN */

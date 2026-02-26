@@ -103,10 +103,18 @@ public class AnalysisTask extends BukkitRunnable {
                     if (cmd != null) {
                         logger.info("[ATOX] Executing: " + cmd);
                         try {
-                            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd);
+                            boolean success = Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd);
+                            if (success) {
+                                logger.info("[ATOX] Command executed successfully: " + sanction.action + " on " + sanction.player);
+                            } else {
+                                logger.warning("[ATOX] Command execution failed: " + cmd);
+                            }
                         } catch (Exception e) {
-                            logger.severe("[ATOX] Command error: " + e.getMessage());
+                            logger.severe("[ATOX] Error executing command '" + cmd + "': " + e.getMessage());
+                            e.printStackTrace();
                         }
+                    } else {
+                        logger.warning("[ATOX] Failed to build command for sanction: " + sanction.action + " on " + sanction.player);
                     }
                 }
             });
