@@ -117,12 +117,39 @@ public class GeminiAnalyzer {
 
         sb.append("SERVER TYPE: \"").append(serverType).append("\"\n\n");
 
-        sb.append("=== WHEN TO SANCTION (only these cases) ===\n");
+        sb.append("=== PRIORITY RULES (apply ALWAYS, no exceptions) ===\n\n");
+
+        sb.append("--- ADVERTISING OTHER SERVERS ---\n");
+        sb.append("The ONLY allowed IPs/domains in chat are: mlmc.lat, moonlightmc.xyz, and any subdomain of these (e.g. play.mlmc.lat, play.moonlightmc.xyz).\n");
+        sb.append("IMMEDIATE BAN if a player mentions or promotes ANY other Minecraft server IP, domain, or name.\n");
+        sb.append("This includes: writing an IP (.net, .com, .xyz, .gg, etc.), known server name, invitation to another server, or link to another server.\n");
+        sb.append("Examples that DO deserve BAN: 'play on hypixel.net', 'come to mineplex.com', 'join play.otherserver.com', 'best server is X.net'\n");
+        sb.append("Examples that do NOT deserve sanction: 'moonlight server', 'mlmc.lat', 'moonlightmc.xyz', 'play.mlmc.lat'\n\n");
+
+        sb.append("--- SPAM ---\n");
+        sb.append("MUTE of 24h if a player repeats the same message (or very similar) 3 or more times in the same analysis cycle.\n");
+        sb.append("Also MUTE of 24h if a player writes meaningless messages or massively repeats characters (e.g. 'aaaaaaaaaa', 'jjjjjjjj', copy-pasting the same text).\n\n");
+
+        sb.append("--- DIRECTLY INSULTING THE SERVER ---\n");
+        sb.append("BAN if a player DIRECTLY and SERIOUSLY insults the server, its owners or administrators with clear intent to damage the reputation.\n");
+        sb.append("Examples that DO deserve BAN: 'this server is trash and the owners are thieves', 'the server steals money and is a scam', 'moonlight is absolute garbage'\n");
+        sb.append("Do NOT sanction: normal gameplay complaints, constructive criticism, expressing momentary frustration ('this server lags so much', 'pvp is broken').\n\n");
+
+        sb.append("--- RMT (REAL MONEY TRADING) ---\n");
+        sb.append("BAN if a player tries to sell, buy or exchange in-game items/currency for real money.\n");
+        sb.append("CLEAR RMT indicators: mentioning PayPal, Venmo, bank transfer, CashApp, or any real payment method in the context of exchanging items/in-game currency.\n");
+        sb.append("Examples that DO deserve BAN: 'selling in-game money for paypal', 'I'll give you items for $5', 'buying coins with venmo', 'trading real dollars for diamonds'\n");
+        sb.append("VERY IMPORTANT - Do NOT sanction if context is clearly in-game: 'selling for 500 coins' (in-game currency), 'trading gold for emeralds', 'selling items for server money'.\n");
+        sb.append("ALSO do NOT sanction if someone mentions returning real money to a friend incidentally outside game context ('I'll pay you back the $5 via paypal tomorrow').\n");
+        sb.append("The KEY is that there must be intent to exchange in-game items/advantages for real money. Analyze the context carefully.\n\n");
+
+        sb.append("=== WHEN TO SANCTION (general cases) ===\n");
         sb.append("- WARN: DIRECT and CLEAR insult against a specific player with genuine intent to offend (e.g. 'you are a f****t [player]', 'n****r [player]').\n");
         sb.append("  DO NOT sanction mild or joking insults: 'idiot', 'stupid', 'noob', 'dumb' are normal in game context.\n");
-        sb.append("- MUTE: VERY SEVERE insults REPEATED more than 3 times in the same cycle toward the same player.\n");
+        sb.append("- MUTE (1h): VERY SEVERE insults REPEATED more than 3 times in the same cycle toward the same player.\n");
+        sb.append("- MUTE (24h): Spam (see spam rule above).\n");
         sb.append("- KICK: Direct threats of real violence against a specific player.\n");
-        sb.append("- BAN: Explicit racial slurs (n****r, etc.), serious hate speech, credible threats of physical harm.\n");
+        sb.append("- BAN: Explicit racial slurs, serious hate speech, credible threats of physical harm, advertising other servers, serious server insults, RMT.\n");
         sb.append("- IPBAN: Real doxxing (publishing address, phone, etc.), credible death threats.\n\n");
 
         sb.append("=== NEVER SANCTION (real examples of what is NOT a violation) ===\n");
