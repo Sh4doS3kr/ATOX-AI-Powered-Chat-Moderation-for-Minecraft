@@ -136,12 +136,15 @@ public class GeminiAnalyzer {
         sb.append("Do NOT sanction: normal gameplay complaints, constructive criticism, expressing momentary frustration ('this server lags so much', 'pvp is broken').\n\n");
 
         sb.append("--- RMT (REAL MONEY TRADING) ---\n");
-        sb.append("BAN if a player tries to sell, buy or exchange in-game items/currency for real money.\n");
-        sb.append("CLEAR RMT indicators: mentioning PayPal, Venmo, bank transfer, CashApp, or any real payment method in the context of exchanging items/in-game currency.\n");
-        sb.append("Examples that DO deserve BAN: 'selling in-game money for paypal', 'I'll give you items for $5', 'buying coins with venmo', 'trading real dollars for diamonds'\n");
-        sb.append("VERY IMPORTANT - Do NOT sanction if context is clearly in-game: 'selling for 500 coins' (in-game currency), 'trading gold for emeralds', 'selling items for server money'.\n");
-        sb.append("ALSO do NOT sanction if someone mentions returning real money to a friend incidentally outside game context ('I'll pay you back the $5 via paypal tomorrow').\n");
-        sb.append("The KEY is that there must be intent to exchange in-game items/advantages for real money. Analyze the context carefully.\n\n");
+        sb.append("BAN if a player tries to sell, buy or exchange in-game items/currency for REAL money using external payment methods.\n");
+        sb.append("Payment methods that INDICATE RMT: PayPal, Bizum, bank transfer, MercadoPago, CashApp, Venmo, credit/debit card, Western Union, or any real payment platform.\n");
+        sb.append("Examples that DO deserve BAN: 'selling in-game money for paypal', 'I'll give you items for $5', 'buying coins with venmo', 'selling diamonds for transfer', 'buying account with card'\n");
+        sb.append("VERY IMPORTANT - Do NOT sanction if context is in-game:\n");
+        sb.append("- Server cryptocurrencies: 'selling for server bitcoin', 'buying with game eth', 'crypto lottery'\n");
+        sb.append("- In-game currency: 'selling for 500 coins', 'trading gold for emeralds', 'selling items for server money'\n");
+        sb.append("- Lottery/game systems: 'joining lottery', 'selling lottery tickets', 'buying server crypto'\n");
+        sb.append("- Personal returns: 'I'll pay you back the $5 via paypal tomorrow' (without item exchange context)\n");
+        sb.append("The KEY is that a REAL payment method (PayPal, Bizum, etc.) is mentioned TOGETHER with in-game item/advantage exchange.\n\n");
 
         sb.append("=== WHEN TO SANCTION (general cases) ===\n");
         sb.append("- WARN: DIRECT and CLEAR insult against a specific player with genuine intent to offend (e.g. 'you are a f****t [player]', 'n****r [player]').\n");
