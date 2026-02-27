@@ -126,21 +126,21 @@ public class GeminiAnalyzer {
         sb.append("- IPBAN: Real doxxing (publishing address, phone, etc.), credible death threats.\n\n");
 
         sb.append("=== NEVER SANCTION (real examples of what is NOT a violation) ===\n");
-        sb.append("- Colloquial slang without a victim: 'lol', 'wtf', 'omg', 'damn', 'crap', 'hell', 'idiot' alone with no target\n");
-        sb.append("- Frustration expressions with no target: 'damn I lost my stuff', 'ugh this is broken', 'why is xp so expensive'\n");
-        sb.append("- Neutral descriptive comments: 'that kid is spoiled', 'typical 14 year old', 'this player again'\n");
-        sb.append("- Normal game requests: 'give me totems', 'set me to fly', 'can I have items'\n");
-        sb.append("- Greetings or affectionate expressions even if informal: 'thanks buddy ;>', 'what are you doing here lol'\n");
-        sb.append("- Ambiguous abbreviations without clear offensive context: 'wtf', 'lmao', 'xd', 'lol'\n");
-        sb.append("- Bodily or vulgar expressions with no target: 'brb bathroom', 'gotta pee'\n");
-        sb.append("- Roleplay or jokes between friends: 'traitor!', 'you are so dumb lol'\n");
-        sb.append("- Personal frustration or hyperbole: 'I want to die' (in game context = hyperbole), 'I hate this so much'\n");
-        sb.append("- Swear words used as exclamations not directed at anyone\n");
-        sb.append("- Calling someone 'gay' in a joking tone between friends without intent to insult\n\n");
+        sb.append("- ALL colloquial slang: 'lol', 'wtf', 'omg', 'damn', 'crap', 'hell', 'stfu', 'lmao', 'bruh', 'bro', 'dude', 'ffs'\n");
+        sb.append("- Mild or joking insults between players: 'idiot', 'stupid', 'dumb', 'noob', 'trash', 'bad', 'shut up', 'you suck'\n");
+        sb.append("- Frustration expressions: 'damn I lost my stuff', 'this is broken', 'I hate this', 'screw this'\n");
+        sb.append("- Descriptive comments: 'that kid is annoying', 'typical noob', 'this player again'\n");
+        sb.append("- Game requests: 'give me totems', 'set me to fly', 'can I have items'\n");
+        sb.append("- Jokes between friends even if strong: 'you are dumb', 'traitor!', 'I will kill you' (in game context), 'I hate you' (joke)\n");
+        sb.append("- Abbreviations: 'xd', 'lol', 'gg', 'ez', 'wp'\n");
+        sb.append("- Swear words without a clear victim: 'damn', 'crap', 'hell', 'ass', 'shit' not directed at anyone\n");
+        sb.append("- Calling someone 'gay' in a joking tone between friends\n");
+        sb.append("- ANY message that is not a SERIOUS, DIRECT, and SUSTAINED attack against another player\n\n");
 
         sb.append("=== IMPORTANT CONTEXT ===\n");
-        sb.append("- Players are mostly teenagers. Their speech is informal and uses a lot of slang.\n");
-        sb.append("- A message only deserves WARN if there is a DIRECT insult to a specific person with clear intent to offend.\n");
+        sb.append("- Players are teenagers. They talk VERY informally with LOTS of slang and swear words. That is NORMAL.\n");
+        sb.append("- Mild insults directed at another player ('idiot', 'stupid', 'noob', 'trash', 'shut up') do NOT deserve a sanction.\n");
+        sb.append("- Only sanction if there is a SERIOUS, SUSTAINED attack with REAL intent to harm (not a joke).\n");
         sb.append("- Doxxing threats ('I'll dox you') DO deserve a sanction even if said as a joke.\n\n");
 
         if (serverType.equalsIgnoreCase("ANARCHY")) {
