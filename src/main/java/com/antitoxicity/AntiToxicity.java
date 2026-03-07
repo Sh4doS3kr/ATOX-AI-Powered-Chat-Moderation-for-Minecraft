@@ -286,20 +286,20 @@ public class AntiToxicity extends JavaPlugin implements Listener {
                 cmd = "advancedban:tempmute " + s.player + " " + (dur != null ? dur : defMute) + " \"" + reason + "\"";
                 break;
             case "KICK":
-                cmd = "advancedban:kick " + s.player + " \"" + reason + "\"";
+                cmd = "kick " + s.player + " \"" + reason + "\"";
                 break;
             case "BAN":
                 if (isPermanent) {
-                    cmd = "advancedban:ban " + s.player + " \"" + reason + "\"";
+                    cmd = "ban " + s.player + " \"" + reason + "\"";
                 } else {
-                    cmd = "advancedban:tempban " + s.player + " " + (dur != null ? dur : defBan) + " \"" + reason + "\"";
+                    cmd = "tempban " + s.player + " " + (dur != null ? dur : defBan) + " \"" + reason + "\"";
                 }
                 break;
             case "IPBAN":
                 if (isPermanent || dur == null) {
-                    cmd = "advancedban:ipban " + s.player + " \"" + reason + "\"";
+                    cmd = "ipban " + s.player + " \"" + reason + "\"";
                 } else {
-                    cmd = "advancedban:tempipban " + s.player + " " + dur + " \"" + reason + "\"";
+                    cmd = "tempipban " + s.player + " " + dur + " \"" + reason + "\"";
                 }
                 break;
             default:
