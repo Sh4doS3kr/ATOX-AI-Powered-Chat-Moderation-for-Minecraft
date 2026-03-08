@@ -122,7 +122,7 @@ public class GeminiAnalyzer {
         sb.append("  DO NOT sanction mild or joking insults: 'idiot', 'stupid', 'noob', 'dumb' are normal in game context.\n");
         sb.append("- MUTE: VERY SEVERE insults REPEATED more than 3 times in the same cycle toward the same player.\n");
         sb.append("- KICK: Direct threats of real violence against a specific player.\n");
-        sb.append("- BAN: Explicit racial slurs (n****r, etc.), serious hate speech, credible threats of physical harm.\n");
+        sb.append("- BAN: COMPLETE and EXPLICIT racial slurs (full n****r, not 'nig'), serious hate speech, credible threats of physical harm.\n");
         sb.append("- IPBAN: Real doxxing (publishing address, phone, etc.), credible death threats.\n\n");
 
         sb.append("=== NEVER SANCTION (real examples of what is NOT a violation) ===\n");
@@ -135,6 +135,7 @@ public class GeminiAnalyzer {
         sb.append("- Abbreviations: 'xd', 'lol', 'gg', 'ez', 'wp'\n");
         sb.append("- Swear words without a clear victim: 'damn', 'crap', 'hell', 'ass', 'shit' not directed at anyone\n");
         sb.append("- Calling someone 'gay' in a joking tone between friends\n");
+        sb.append("- Partial words or substrings: 'nig' (not a slur), 'fag' (not a slur), 'black' as color or nickname\n");
         sb.append("- ANY message that is not a SERIOUS, DIRECT, and SUSTAINED attack against another player\n\n");
 
         sb.append("=== IMPORTANT CONTEXT ===\n");
