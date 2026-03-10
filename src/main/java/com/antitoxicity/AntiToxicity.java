@@ -25,6 +25,7 @@ public class AntiToxicity extends JavaPlugin implements Listener {
     private BukkitTask analysisTask;
     private long maxAgeMillis;
     private SanctionTracker sanctionTracker;
+    private UsernameCache usernameCache;
 
     // ---- Public API for ChatListener ----
     public void storeMessage(String playerName, String message) {
@@ -128,6 +129,9 @@ public class AntiToxicity extends JavaPlugin implements Listener {
         if (analysisTask != null) {
             analysisTask.cancel();
         }
+        if (usernameCache != null) {
+            usernameCache.saveCache();
+        }
         getLogger().info("ATOX disabled.");
     }
 
@@ -165,6 +169,7 @@ public class AntiToxicity extends JavaPlugin implements Listener {
 
         geminiAnalyzer = new GeminiAnalyzer(apiKey, model, fallbackModel, serverType, getLogger());
         discordWebhook = new DiscordWebhook(webhookUrl, serverName, serverType, getLogger());
+        usernameCache = new UsernameCache(getDataFolder(), getLogger());
 
         long intervalTicks = intervalMinutes * 60L * 20L;
         AnalysisTask task = new AnalysisTask(
@@ -370,18 +375,44 @@ public class AntiToxicity extends JavaPlugin implements Listener {
     @EventHandler(priority = EventPriority.HIGH)
     public void onPlayerPreLogin(AsyncPlayerPreLoginEvent event) {
         if (!getConfig().getBoolean("username-check.enabled", true)) return;
-        if (geminiAnalyzer == null) return;
+        if (geminiAnalyzer == null || usernameCache == null) return;
 
         String name = event.getName();
+        
+        // Check cache first
+        String cachedResult = usernameCache.getCachedResult(name);
+        if (cachedResult != null) {
+            // Username was analyzed before
+            if (!cachedResult.isEmpty()) {
+                // Cached as offensive
+                String kickMsg = getConfig().getString("username-check.kick-message",
+                        "Your username is not allowed on this server.\nReason: {reason}");
+                kickMsg = kickMsg.replace("{reason}", cachedResult);
+                event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, kickMsg);
+                getLogger().info("[ATOX] Offensive username blocked (cache): " + name + " | Reason: " + cachedResult);
+                discordWebhook.sendUsernameBlock(name, cachedResult);
+            } else {
+                // Cached as safe
+                getLogger().info("[ATOX] Username allowed (cache): " + name);
+            }
+            return;
+        }
+
+        // Not cached, analyze with AI
         String offensiveReason = geminiAnalyzer.analyzeUsername(name);
+        
+        // Cache the result
+        usernameCache.cacheResult(name, offensiveReason);
 
         if (offensiveReason != null && !offensiveReason.isEmpty()) {
             String kickMsg = getConfig().getString("username-check.kick-message",
-                    "Your username is not allowed on this server.\nReason: {reason}\n\nChange your name and try again.");
+                    "Your username is not allowed on this server.\nReason: {reason}");
             kickMsg = kickMsg.replace("{reason}", offensiveReason);
             event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, kickMsg);
-            getLogger().warning("[ATOX] Offensive username blocked: " + name + " | Reason: " + offensiveReason);
+            getLogger().warning("[ATOX] Offensive username blocked (AI): " + name + " | Reason: " + offensiveReason);
             discordWebhook.sendUsernameBlock(name, offensiveReason);
+        } else {
+            getLogger().info("[ATOX] Username analyzed and allowed (AI): " + name);
         }
     }
 
